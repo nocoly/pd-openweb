@@ -8,11 +8,11 @@ Unlock comprehensive frontend customization capabilities to create a unique visu
 
 **Note:** The source code version must match the deployed HAP version. Otherwise, API incompatibility may occur. Once you choose to customize the source code, you will need to merge your customizations with the corresponding source code version whenever HAP Private Deployment is upgraded.
 
-👉 [Quick Start](https://docs-pd.nocoly.com/en/sd/web/start)
+👉 [Quick Start](https://docs-pd.nocoly.com/en/hap/sd/web/start)
 
 # Documentation
 
-You can find the [Openweb](https://docs-pd.nocoly.com/en/sd/web/) documentation in the HAP Server Documentation Center.
+You can find the [Openweb](https://docs-pd.nocoly.com/en/hap/sd/web/) documentation in the HAP Server Documentation Center.
 
 # License
 
