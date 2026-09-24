@@ -1,4 +1,5 @@
 name: Sync upstream main and tags
+run-name: Sync upstream main and tags
 
 on:
   schedule:
