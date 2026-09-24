@@ -1,4 +1,4 @@
-name: Sync upstream main
+name: Sync upstream main and tags
 
 on:
   schedule:
@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: false
 
-      - name: Merge upstream updates
+      - name: Merge upstream updates and synchronize tags
         shell: bash
         run: |
           set -euo pipefail
@@ -37,18 +37,33 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git remote add upstream https://github.com/mingdaocom/pd-openweb.git
           git fetch --no-tags upstream refs/heads/main:refs/remotes/upstream/main
+          git fetch --no-tags upstream '+refs/tags/*:refs/upstream-tags/*'
           upstream_sha=$(git rev-parse refs/remotes/upstream/main)
 
           if git merge-base --is-ancestor "$upstream_sha" HEAD; then
             echo "Already synchronized with upstream main ($upstream_sha)." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+          else
+            # Pause before committing, even for a fast-forward, to preserve our README.
+            git merge --no-commit --no-ff --no-stat "$upstream_sha" || true
+            if ! git rev-parse --quiet --verify MERGE_HEAD > /dev/null; then
+              echo '::error::Unable to start upstream merge; remote main was not changed.'
+              exit 1
+            fi
+
+            if git cat-file -e HEAD:README.md 2>/dev/null; then
+              git restore --source=HEAD --staged --worktree -- README.md
+            else
+              git rm --force --ignore-unmatch -- README.md
+            fi
+
+            if [[ -n "$(git diff --name-only --diff-filter=U)" ]]; then
+              git merge --abort
+              echo '::error::Upstream merge has conflicts outside README.md. Resolve them manually; remote main was not changed.'
+              exit 1
+            fi
+
+            git commit --no-edit
           fi
 
-          if ! git merge --no-edit --no-stat "$upstream_sha"; then
-            git merge --abort
-            echo '::error::Upstream merge failed. Resolve the conflict manually; remote main was not changed.'
-            exit 1
-          fi
-
-          git push origin HEAD:refs/heads/main
-          echo "Synchronized upstream main ($upstream_sha)." >> "$GITHUB_STEP_SUMMARY"
+          git push --atomic origin HEAD:refs/heads/main 'refs/upstream-tags/*:refs/tags/*'
+          echo "Synchronized upstream main ($upstream_sha) and tags, preserving the destination README.md." >> "$GITHUB_STEP_SUMMARY"
