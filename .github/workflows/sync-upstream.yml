@@ -1,0 +1,54 @@
+name: Sync upstream main
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-upstream.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'nocoly/pd-openweb' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out destination main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          fetch-depth: 0
+          fetch-tags: false
+
+      - name: Merge upstream updates
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add upstream https://github.com/mingdaocom/pd-openweb.git
+          git fetch --no-tags upstream refs/heads/main:refs/remotes/upstream/main
+          upstream_sha=$(git rev-parse refs/remotes/upstream/main)
+
+          if git merge-base --is-ancestor "$upstream_sha" HEAD; then
+            echo "Already synchronized with upstream main ($upstream_sha)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if ! git merge --no-edit --no-stat "$upstream_sha"; then
+            git merge --abort
+            echo '::error::Upstream merge failed. Resolve the conflict manually; remote main was not changed.'
+            exit 1
+          fi
+
+          git push origin HEAD:refs/heads/main
+          echo "Synchronized upstream main ($upstream_sha)." >> "$GITHUB_STEP_SUMMARY"
