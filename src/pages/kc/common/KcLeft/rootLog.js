@@ -1,7 +1,9 @@
 import React, { Fragment } from 'react';
-import { Dialog, UserCard } from 'ming-ui';
+import { UserCard } from 'ming-ui';
+import { Modal } from 'ming-ui/antd-components';
 import service from '../../api/service';
-import { htmlEncodeReg, pathCompletion } from 'src/utils/common';
+import { htmlEncodeReg } from 'src/utils/core/string';
+import { pathCompletion } from 'src/utils/platform/navigation/path';
 import { PERMISSION_TYPE_NAME, PICK_TYPE, ROOT_LOG_TYPE, ROOT_PERMISSION_TYPE } from '../../constant/enum';
 import { humanDateTime } from '../../utils';
 import './rootLog.less';
@@ -34,17 +36,17 @@ function memberLinkHtml(member, logContent) {
  * @param  {[object]} log
  */
 function logDesc(log) {
-  const childType = log.content.childType === 2 ? '文件 ' : '文件夹 ';
+  const childType = log.content.childType === 2 ? _l('文件') + ' ' : _l('文件夹') + ' ';
 
   switch (log.type) {
     case ROOT_LOG_TYPE.CREATE:
-      return '创建了' + htmlEncodeReg(log.content.name);
+      return _l('创建了%0', htmlEncodeReg(log.content.name));
     case ROOT_LOG_TYPE.RECYCLED:
-      return '将此共享文件夹放入了回收站';
+      return _l('将此共享文件夹放入了回收站');
     case ROOT_LOG_TYPE.DELETED:
-      return '彻底删除了此共享文件夹';
+      return _l('彻底删除了此共享文件夹');
     case ROOT_LOG_TYPE.RECOVERY:
-      return '还原了此共享文件夹';
+      return _l('还原了此共享文件夹');
     case ROOT_LOG_TYPE.ADDMEMBER:
       return (
         <Fragment>
@@ -128,7 +130,7 @@ function logDesc(log) {
                   <span className="mRight5">{_l('将')}</span>
                   {change.memberArr.map(member => memberLinkHtml(member, log.content))}
                   {_l('的权限')}
-                  {change.originPermission && `从 ${PERMISSION_TYPE_NAME[change.originPermission]} `}
+                  {change.originPermission && _l('从 %0', PERMISSION_TYPE_NAME[change.originPermission]) + ' '}
                   {_l('调整为 %0', PERMISSION_TYPE_NAME[change.permission])}
                 </Fragment>
               );
@@ -139,19 +141,19 @@ function logDesc(log) {
     }
 
     case ROOT_LOG_TYPE.RENAME:
-      return '重命名了共享文件夹 ' + htmlEncodeReg(log.content.oldName) + ' 为 ' + htmlEncodeReg(log.content.newName);
+      return _l('重命名了共享文件夹 %0 为 %1', htmlEncodeReg(log.content.oldName), htmlEncodeReg(log.content.newName));
     case ROOT_LOG_TYPE.EXITMEMBER:
-      return '退出了此共享文件夹';
+      return _l('退出了此共享文件夹');
     case ROOT_LOG_TYPE.CHILDADD:
-      return '添加了' + childType + htmlEncodeReg(log.content.childName);
+      return _l('添加了%0%1', childType, htmlEncodeReg(log.content.childName));
     case ROOT_LOG_TYPE.CHILDMOVE:
-      return '移动了' + childType + htmlEncodeReg(log.content.childName);
+      return _l('移动了%0%1', childType, htmlEncodeReg(log.content.childName));
     case ROOT_LOG_TYPE.CHILDRECYCLED:
-      return '将' + childType + htmlEncodeReg(log.content.childName) + '放入回收站';
+      return _l('将%0%1放入回收站', childType, htmlEncodeReg(log.content.childName));
     case ROOT_LOG_TYPE.CHILDDELETED:
-      return '彻底删除了' + childType + htmlEncodeReg(log.content.childName);
+      return _l('彻底删除了%0%1', childType, htmlEncodeReg(log.content.childName));
     case ROOT_LOG_TYPE.CHILDRESTORE:
-      return '恢复了' + childType + htmlEncodeReg(log.content.childName);
+      return _l('恢复了%0%1', childType, htmlEncodeReg(log.content.childName));
     default:
       return '';
   }
@@ -165,19 +167,18 @@ function logDesc(log) {
 export function getRootLog(rootName, rootId) {
   const srv = rootId === PICK_TYPE.MY ? service.getMyLogDetail() : service.getRootLogDetail({ id: rootId });
   srv.then(result => {
-    Dialog.confirm({
+    Modal.confirm({
       title: _l('%0的日志', htmlEncodeReg(rootName)),
       width: 410,
-      noFooter: true,
-      dialogBoxID: 'rootLogs',
+      footer: null,
       className: 'kcDialogBox',
-      description: (
+      styles: { body: { overflow: 'hidden' } },
+      content: (
         <ul class="rootLog">
           {result.logCount ? (
             <Fragment>
               {result.logContent.map(item => {
                 let logTypeName;
-
                 if (item.type === ROOT_LOG_TYPE.CREATE || item.type === ROOT_LOG_TYPE.CHILDADD) {
                   logTypeName = 'icon-plus';
                 } else if (
@@ -190,7 +191,6 @@ export function getRootLog(rootName, rootId) {
                 } else {
                   logTypeName = 'icon-edit';
                 }
-
                 return (
                   <li>
                     <i className={`rootLogType ${logTypeName}`}></i>

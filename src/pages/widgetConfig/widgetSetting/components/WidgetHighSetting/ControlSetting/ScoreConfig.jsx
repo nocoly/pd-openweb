@@ -1,10 +1,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Checkbox, Dialog } from 'ming-ui';
-import { getStrBytesLength } from 'src/pages/Role/PortalCon/tabCon/util-pure.js';
-import { getStringBytes } from 'src/utils/common';
+import { Checkbox, Input, Modal } from 'ming-ui/antd-components';
+import { getStrBytesLength } from 'src/utils/core/string';
+import { getStringBytes } from 'src/utils/core/string';
+import { getAdvanceSetting, handleAdvancedSettingChange } from 'src/utils/domain/control/advancedSetting';
 import { EditInfo } from '../../../../styled';
-import { getAdvanceSetting, handleAdvancedSettingChange } from '../../../../util/setting';
 
 const ItemName = styled.div`
   display: flex;
@@ -32,19 +32,15 @@ const ItemName = styled.div`
   }
   .scoreText {
     flex: 1;
-    height: 36px;
-    border: 1px solid var(--color-border-primary);
-    border-radius: 3px;
-    padding: 0 12px;
   }
 `;
 
-const defaultNames = [
-  { key: '1', value: '很差' },
-  { key: '2', value: '差' },
-  { key: '3', value: '一般' },
-  { key: '4', value: '好' },
-  { key: '5', value: '非常好' },
+const getDefaultNames = () => [
+  { key: '1', value: _l('很差') },
+  { key: '2', value: _l('差') },
+  { key: '3', value: _l('一般') },
+  { key: '4', value: _l('好') },
+  { key: '5', value: _l('非常好') },
 ];
 
 export default function ScoreConfig({ data, onChange }) {
@@ -65,7 +61,7 @@ export default function ScoreConfig({ data, onChange }) {
 
   useEffect(() => {
     if (Number(max) === 5 && itemnames.length !== 5) {
-      setNames(defaultNames);
+      setNames(getDefaultNames());
       return;
     }
 
@@ -85,29 +81,41 @@ export default function ScoreConfig({ data, onChange }) {
     <Fragment>
       <div className="labelWrap">
         <Checkbox
-          size="small"
           checked={showvalue === '1'}
-          text={_l('显示选中结果')}
-          onClick={checked => onChange(handleAdvancedSettingChange(data, { showvalue: checked ? '0' : '1' }))}
-        />
+          onChange={event =>
+            onChange(
+              handleAdvancedSettingChange(data, {
+                showvalue: !event.target.checked ? '0' : '1',
+              }),
+            )
+          }
+          size="small"
+        >
+          {_l('显示选中结果')}
+        </Checkbox>
       </div>
       <div className="labelWrap">
         <Checkbox
-          size="small"
           checked={itemnames.length}
-          text={_l('自定义等级文案')}
-          onClick={checked => {
-            if (!checked) {
+          onChange={event => {
+            if (event.target.checked) {
               if (!names.length && Number(max) === 5) {
-                setNames(defaultNames);
+                setNames(getDefaultNames());
               }
 
               setVisible(true);
             } else {
-              onChange(handleAdvancedSettingChange(data, { itemnames: '' }));
+              onChange(
+                handleAdvancedSettingChange(data, {
+                  itemnames: '',
+                }),
+              );
             }
           }}
-        />
+          size="small"
+        >
+          {_l('自定义等级文案')}
+        </Checkbox>
       </div>
 
       {itemnames.length > 0 && (
@@ -124,9 +132,11 @@ export default function ScoreConfig({ data, onChange }) {
         </EditInfo>
       )}
 
-      <Dialog
+      <Modal
         width={500}
-        visible={visible}
+        open={visible}
+        mask={{ closable: true }}
+        keyboard
         title={_l('设置等级说明')}
         onCancel={() => {
           setNames(getNames());
@@ -149,7 +159,7 @@ export default function ScoreConfig({ data, onChange }) {
             return (
               <ItemName>
                 <div className="scoreIndex">{it.key}</div>
-                <input
+                <Input
                   className="scoreText"
                   value={it.value}
                   onChange={e => {
@@ -167,7 +177,7 @@ export default function ScoreConfig({ data, onChange }) {
             );
           })}
         </Fragment>
-      </Dialog>
+      </Modal>
     </Fragment>
   );
 }

@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import Remarkable from 'remarkable';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
+import Remarkable from 'ming-ui/components/Remarkable';
+import { sanitizePostMessageHtml } from 'src/utils/core/sanitizeHtml';
 import MarkdownWithCSS from './MarkdownWithCSS';
 
 function genContentFromWithImage(content) {
@@ -77,7 +78,7 @@ const Markdown = React.memo(
           }
 
           return `<div class="code-card" data-message-id="${id}">
-  <div class="title">${title || '字段控件'}</div>
+  <div class="title">${title || _l('字段控件')}</div>
   <div class="file-name">${fileName || 'Free_field.jsx'}</div>
   ${codeIsClosed === false ? '<div class="border-beam"></div>' : ''}
 </div>`;
@@ -100,7 +101,9 @@ const Markdown = React.memo(
     return (
       <MarkdownWithCSS
         dangerouslySetInnerHTML={{
-          __html: markdown.render(typeof content === 'string' ? content : genContentFromWithImage(content)),
+          __html: sanitizePostMessageHtml(
+            markdown.render(typeof content === 'string' ? content : genContentFromWithImage(content)),
+          ),
         }}
       />
     );

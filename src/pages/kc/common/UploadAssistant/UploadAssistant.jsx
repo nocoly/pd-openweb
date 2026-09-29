@@ -4,14 +4,14 @@ import Immutable from 'immutable';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import qs from 'query-string';
+import { Button } from 'ming-ui/antd-components';
 import Icon from 'ming-ui/components/Icon';
 import { mdNotification } from 'ming-ui/functions';
 import service from '../../api/service';
 import folderDg from 'src/components/kc/folderSelectDialog/folderSelectDialog';
 import createUploader from 'src/library/plupload/createUploader';
-import { getClassNameByExt } from 'src/utils/common';
+import { getClassNameByExt } from 'src/utils/domain/file/classification';
 import { MAX_FILE_COUNT, PICK_TYPE, UPLOAD_ERROR, UPLOAD_STATUS } from '../../constant/enum';
-import HoverState from '../../decorators/withHoverState';
 import { getUrlByBucketName, humanFileSize } from '../../utils';
 import './uploadAssistant.css';
 
@@ -35,7 +35,7 @@ class UploadProgress extends React.Component {
         break;
       case UPLOAD_STATUS.ERROR:
         colorClass = 'bgError';
-        text = this.props.errorText || '上传失败';
+        text = this.props.errorText || _l('上传失败');
         icon = <Icon className="uploadPercentageText fgError" icon="delete" />;
         break;
       case UPLOAD_STATUS.UPLOADING:
@@ -331,7 +331,7 @@ class UploadAssistant extends React.Component {
 
     window.onbeforeunload = function () {
       if (comp.state.fileList.find(fileItem => fileItem.status === UPLOAD_STATUS.UPLOADING)) {
-        return '有文件正在上传中，确定要放弃上传？';
+        return _l('有文件正在上传中，确定要放弃上传？');
       }
     };
 
@@ -436,7 +436,6 @@ class UploadAssistant extends React.Component {
     }
 
     $('#selectFileTrigger').click();
-    this.setState({ hoverChooseBtn: false });
   };
 
   selectDirectory = (evt = null) => {
@@ -449,8 +448,6 @@ class UploadAssistant extends React.Component {
     } else {
       alert(_l('仅支持 Chrome 内核浏览器'), 3);
     }
-
-    this.setState({ hoverChooseBtn: false });
   };
 
   render() {
@@ -471,24 +468,14 @@ class UploadAssistant extends React.Component {
             <div className="dropDesc">{this.state.dragOver ? _l('松开鼠标开始上传') : _l('拖拽文件到这里上传')}</div>
           </div>
           <div className="chooseBtnContainer">
-            <HoverState
-              id="selectFileTrigger"
-              thisArg={this}
-              hoverStateName="hoverChooseBtn"
-              className="chooseBtn hoverBgColorPrimaryDark bgColorPrimary"
-            >
-              <span className="chooseBtnText">{_l('选择文件')}</span>
-            </HoverState>
+            <Button id="selectFileTrigger" type="primary" size="large" wide>
+              {_l('选择文件')}
+            </Button>
 
             {!window.isMDClient && (
-              <HoverState
-                thisArg={this}
-                onClick={this.selectDirectory}
-                hoverStateName="hoverChooseBtn"
-                className="chooseBtn hoverBgColorPrimaryDark bgColorPrimary mLeft20"
-              >
-                <span className="chooseBtnText">{_l('选择文件夹')}</span>
-              </HoverState>
+              <Button type="primary" size="large" wide onClick={this.selectDirectory} className="mLeft20">
+                {_l('选择文件夹')}
+              </Button>
             )}
             <div
               className="hide"

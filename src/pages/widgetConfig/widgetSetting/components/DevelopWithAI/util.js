@@ -1,7 +1,7 @@
 import { get, pick } from 'lodash';
 import _ from 'lodash';
 import codeAjax from 'src/api/code';
-import { WIDGETS_TO_API_TYPE_ENUM } from '../../../config/widget';
+import { WIDGETS_TO_API_TYPE_ENUM } from 'src/utils/domain/control/widgetTypes';
 import { Date, MultipleSelect, Number, RelateRecord, SingleSelect, Text, Time } from './examples';
 
 export const getEnvControls = (reference, allControls) => {
@@ -34,6 +34,7 @@ export const generatePrompt = (systemPrompt, { envControls, isRefValue, control 
     getControlTypeName(control) + ' ' + JSON.stringify(pick(control, ['controlName', 'controlId', 'type'])),
     envControls,
   ];
+
   return systemPrompt.replace(/\{\d\}/g, match => {
     return needReplace[match.slice(1, -1)];
   });
@@ -213,7 +214,9 @@ export function getDefaultPrompt(control) {
     case WIDGETS_TO_API_TYPE_ENUM.TIME:
       return {
         title: _l('生成一个电子时钟'),
-        content: `生成一个现代科技风格的电子时钟，展示小时和分钟，用户可以分别设置小时与分钟，修改其中任意一个时，都将时间以"00:00"的格式保存。如果载入时有值，将值回显到时钟上显示。当组件参数 env 中的 isDisabled 为 true 时，禁止设置时钟，只能展示时间。`,
+        content: _l(
+          '生成一个现代科技风格的电子时钟，展示小时和分钟，用户可以分别设置小时与分钟，修改其中任意一个时，都将时间以"00:00"的格式保存。如果载入时有值，将值回显到时钟上显示。当组件参数 env 中的 isDisabled 为 true 时，禁止设置时钟，只能展示时间。',
+        ),
       };
     case WIDGETS_TO_API_TYPE_ENUM.FLAT_MENU:
       return {

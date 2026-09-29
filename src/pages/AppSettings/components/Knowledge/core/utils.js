@@ -1,8 +1,8 @@
 import worksheetAjax from 'src/api/worksheet';
 import { buriedUpgradeVersionDialog } from 'src/components/upgradeVersion';
-import { getIconByType } from 'src/pages/widgetConfig/util';
-import { VersionProductType } from 'src/utils/enum';
-import { getFeatureStatus } from 'src/utils/project';
+import { getIconByType } from 'src/utils/domain/control/metadata';
+import { VersionProductType } from 'src/utils/domain/shared/productFeatures';
+import { getFeatureStatus } from 'src/utils/services/project';
 import {
   DATA_FILTER_FIELD_TYPES,
   FILTER_CONDITION_TYPE,
@@ -54,7 +54,7 @@ const isValidValue = v => v !== undefined && v !== null && v !== '';
  * @returns {string} 中文描述
  */
 export const formatFilterConditionToText = (filters = [], controls = []) => {
-  const spliceText = type => SPLICE_TYPE[type] || '且';
+  const spliceText = type => SPLICE_TYPE[type] || _l('且');
 
   const controlMap = new Map(controls.map(c => [c.controlId, c]));
   const getControl = id => controlMap.get(id);

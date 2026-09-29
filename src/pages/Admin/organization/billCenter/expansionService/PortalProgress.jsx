@@ -1,8 +1,7 @@
 ﻿import React, { Component, Fragment } from 'react';
 import cx from 'classnames';
 import moment from 'moment';
-import { Radio } from 'ming-ui';
-import { Tooltip } from 'ming-ui/antd-components';
+import { Radio, Tooltip } from 'ming-ui/antd-components';
 import Config from '../../../config';
 import './style.less';
 
@@ -205,10 +204,12 @@ export default class PortalProgress extends Component {
                   return (
                     <Radio
                       className="mLeft32"
-                      text={item.text}
                       checked={payType === item.value}
-                      onClick={() => handleChange('payType', item.value)}
-                    />
+                      onChange={() => handleChange('payType', item.value)}
+                      title={item.text}
+                    >
+                      {item.text}
+                    </Radio>
                   );
                 })}
               </div>
@@ -219,10 +220,12 @@ export default class PortalProgress extends Component {
               <div className="mBottom32">
                 {subscribeTypes.map(item => (
                   <Radio
-                    text={item.text}
                     checked={externalType === item.value}
-                    onClick={() => handleChange('externalType', item.value)}
-                  />
+                    onChange={() => handleChange('externalType', item.value)}
+                    title={item.text}
+                  >
+                    {item.text}
+                  </Radio>
                 ))}
               </div>
             </Fragment>
@@ -266,7 +269,7 @@ export default class PortalProgress extends Component {
             </div>
             <div className="mBottom16">
               <span className="textTertiary mRight18">{_l('到期时间：')}</span>
-              <span>{moment(licenseInfo.endDate).format('YYYY年MM月DD日')}</span>
+              <span>{moment(licenseInfo.endDate).format(_l('YYYY年MM月DD日'))}</span>
               <span className="textTertiary">{_l('（计费：%0天）', licenseInfo.expireDays)}</span>
             </div>
           </Fragment>

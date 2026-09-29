@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Icon, LoadDiv, ScrollView } from 'ming-ui';
 import InvitationController from 'src/api/invitation';
 import ProjectController from 'src/api/project';
-import { existAccountHint } from 'src/utils/inviteCommon';
+import { existAccountHint } from 'src/utils/services/inviteCommon';
 
 const Tips = {
   1: _l('暂无使用中的邀请链接'),
@@ -130,7 +130,7 @@ export default class DetailList extends Component {
         </div>
         <div className="flexRow Font12">
           <span className="textTertiary">{_l('链接截止时间：')}</span>
-          <span>{date.format('YYYY') === '9999' ? _l('永久有效') : date.format('YYYY年MM月DD日 HH:mm')}</span>
+          <span>{date.format('YYYY') === '9999' ? _l('永久有效') : date.format(_l('YYYY年MM月DD日 HH:mm'))}</span>
         </div>
       </div>
     );

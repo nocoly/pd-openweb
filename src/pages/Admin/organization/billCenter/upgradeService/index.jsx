@@ -1,20 +1,20 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Checkbox } from 'antd';
 import cx from 'classnames';
 import _ from 'lodash';
 import moment from 'moment';
 import { Icon, LoadDiv } from 'ming-ui';
+import { Button, Checkbox } from 'ming-ui/antd-components';
 import orderController from 'src/api/order';
 import projectController from 'src/api/project';
-import { pathCompletion } from 'src/utils/common';
+import { pathCompletion } from 'src/utils/platform/navigation/path';
 import Config from '../../../config';
 import './style.less';
 
 let UpgradeService = class UpgradeService extends Component {
   constructor() {
     super();
-    Config.setPageTitle(_l('升级产品'));
+    Config.setPageTitle(window.platformENV.isHap ? _l('升级明道云产品') : _l('升级产品'));
     this.state = {
       step: 1,
       versionId: null,
@@ -227,7 +227,7 @@ let UpgradeService = class UpgradeService extends Component {
                   <div className="mTop8 mBottom8">
                     <div className="oneStepLeft">{_l('到期时间：')}</div>
                     <span className="color_b">
-                      {moment(versionData.currentLicenseEndDate).format('YYYY年MM月DD日')}
+                      {moment(versionData.currentLicenseEndDate).format(_l('YYYY年MM月DD日'))}
                     </span>
                   </div>
                   <div>
@@ -236,13 +236,9 @@ let UpgradeService = class UpgradeService extends Component {
                     <span className="Font20 color_b Bold">{totalPrice}</span>
                   </div>
                   <div className="pTop30">
-                    <button
-                      type="button"
-                      className="ming Button Button--primary nextBtn"
-                      onClick={() => this.setStep(2)}
-                    >
+                    <Button type="primary" shape="round" onClick={() => this.setStep(2)}>
                       {_l('下一步')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -258,20 +254,16 @@ let UpgradeService = class UpgradeService extends Component {
                   <div className="infoShowRow">
                     <div className="infoShowLabel">{_l('到期时间:')}</div>
                     <div className="infoShowResult">
-                      {moment(versionData.currentLicenseEndDate).format('YYYY年MM月DD日')}
+                      {moment(versionData.currentLicenseEndDate).format(_l('YYYY年MM月DD日'))}
                     </div>
                   </div>
                   <div className="infoShowRow">
                     <span className="infoShowLabel">{_l('总计金额：')}</span>
                     <span className="infoShowResult Font20">￥{totalPrice}</span>
                   </div>
-                  <button
-                    type="button"
-                    className="ming Button Button--link colorPrimary pAll0 mTop24"
-                    onClick={() => this.setStep(1)}
-                  >
+                  <Button color="primary" variant="link" className="mTop24" onClick={() => this.setStep(1)}>
                     {_l('修改')}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -302,14 +294,9 @@ let UpgradeService = class UpgradeService extends Component {
                 <span className="Font24 Bold color_b">￥{totalPrice}</span>
               </div>
               <div className="pTop40">
-                <button
-                  type="button"
-                  disabled={isPay}
-                  className="ming Button Button--primary nextBtn"
-                  onClick={() => this.handlePay()}
-                >
+                <Button type="primary" shape="round" loading={isPay} onClick={() => this.handlePay()}>
                   {_l('确认下单')}
-                </button>
+                </Button>
               </div>
               <div className="warpNeedHelp">
                 <Checkbox onChange={this.handleCheckBox.bind(this)} checked={needSalesAssistance}>

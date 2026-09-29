@@ -7,8 +7,8 @@ import { RichText } from 'ming-ui';
 import { Hr } from 'worksheet/components/Basics';
 import FixedContent from 'src/components/FixedContent';
 import { INVOICE_STATUS } from 'src/pages/invoice/constant';
-import { getRequest } from 'src/utils/common';
-import { renderText } from 'src/utils/control';
+import { renderText } from 'src/utils/domain/control/display';
+import { getRequest } from 'src/utils/platform/browser/device';
 import ApplyInvoiceBtn from '../invoice/ApplyInvoiceBtn';
 import { FILL_STATUS } from './enum';
 import FilledRecord from './FilledRecord';
@@ -187,7 +187,7 @@ export default function NotFillStatus(props) {
           {getTip(worksheetId, status) && <Tip2 className="mTop8">{getTip(worksheetId, status)}</Tip2>}
           {status === FILL_STATUS.NOT_OPEN && (
             <Tip2 className="mTop8">
-              {_l('表单将于') + moment(linkSwitchTime.startTime).format('YYYY年MM月DD日 HH:mm') + _l('开放填写')}
+              {_l('表单将于') + moment(linkSwitchTime.startTime).format(_l('YYYY年MM月DD日 HH:mm')) + _l('开放填写')}
             </Tip2>
           )}
 
