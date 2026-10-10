@@ -107,10 +107,11 @@ const NumberComp = props => {
     isFormDetail = false,
     formItemId,
     registerCell,
+    flag,
   } = props;
 
   const [isFocused, setIsFocused] = useState(false);
-  const [inputDraft, setInputDraft] = useState('');
+  const [inputDraft, setInputDraft] = useState({ value: '', flag });
   const [originValue, setOriginValue] = useState('');
 
   const numberRef = useRef(null);
@@ -131,7 +132,11 @@ const NumberComp = props => {
 
   const onFocus = () => {
     setOriginValue(`${inputValue || ''}`.trim());
-    setInputDraft(pendingStepValueRef.current ?? `${inputValue || ''}`);
+    setInputDraft({
+      value: pendingStepValueRef.current ?? `${inputValue ?? ''}`,
+      flag,
+      hasInput: pendingStepValueRef.current !== null,
+    });
     pendingStepValueRef.current = null;
     setIsFocused(true);
     if (_.isFunction(triggerCustomEvent)) {
@@ -146,12 +151,13 @@ const NumberComp = props => {
       value = '';
     }
 
-    setInputDraft(value);
+    const draftValue = value;
 
     if (advancedSetting.numshow === '1' && !isNaN(parseFloat(value))) {
       value = accDiv(parseFloat(value), 100);
     }
 
+    setInputDraft({ value: draftValue, flag, hasInput: true });
     onChange(value);
   };
 
@@ -193,7 +199,8 @@ const NumberComp = props => {
 
   const isStepNumber = showtype === '3';
   const inputValue = numshow === '1' && value ? accMul(value, 100) : value;
-  const numberInputValue = isFocused ? inputDraft : inputValue;
+  // 实际输入后保留小数点等中间态；仅聚焦时跟随父级，避免连续创建时缓存重置前的值。
+  const numberInputValue = isFocused && inputDraft.hasInput && inputDraft.flag === flag ? inputDraft.value : inputValue;
   const hasValue = value !== '' && value !== null && value !== undefined;
   const showPercentNextToValue = numshow === '1' && hasValue && !isFocused;
   const inputSuffix = showPercentNextToValue ? '' : suffix;
@@ -303,7 +310,7 @@ const NumberComp = props => {
       parser={sanitizeNumberValue}
       formatter={(currentValue, { userTyping, input }) => {
         if (userTyping) return sanitizeNumberValue(input);
-        if (isFocused) return `${currentValue ?? ''}`;
+        if (isFocused) return `${numberInputValue ?? ''}`;
 
         const displayValue = formatDisplayValue(currentValue);
         return showPercentNextToValue && displayValue && suffix ? `${displayValue}${suffix}` : displayValue;
@@ -346,11 +353,13 @@ NumberComp.propTypes = {
   showMaskValue: PropTypes.bool,
   isMaskReadonly: PropTypes.bool,
   isFormDetail: PropTypes.bool,
+  flag: PropTypes.any,
 };
 
 export default memo(NumberComp, (prevProps, nextProps) => {
   return _.isEqual(
     _.pick(prevProps, [
+      'flag',
       'value',
       'disabled',
       'showMaskValue',
@@ -363,6 +372,7 @@ export default memo(NumberComp, (prevProps, nextProps) => {
       'otherSheetControlType',
     ]),
     _.pick(nextProps, [
+      'flag',
       'value',
       'disabled',
       'showMaskValue',
