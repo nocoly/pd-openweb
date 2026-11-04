@@ -66,5 +66,19 @@ jobs:
             git commit --no-edit
           fi
 
-          git push --atomic origin HEAD:refs/heads/main 'refs/upstream-tags/*:refs/tags/*'
-          echo "Synchronized upstream main ($upstream_sha) and tags, preserving the destination README.md." >> "$GITHUB_STEP_SUMMARY"
+          # Preserve existing destination tags, including tags that differ from upstream.
+          git fetch --no-tags origin '+refs/tags/*:refs/destination-tags/*'
+          push_refs=(HEAD:refs/heads/main)
+          while IFS=' ' read -r upstream_tag_sha tag; do
+            if destination_tag_sha=$(git rev-parse --quiet --verify "refs/destination-tags/$tag"); then
+              if [[ "$destination_tag_sha" != "$upstream_tag_sha" ]]; then
+                echo "::warning::Tag $tag differs from upstream; preserving the destination tag."
+                echo "Preserved differing destination tag: $tag." >> "$GITHUB_STEP_SUMMARY"
+              fi
+            else
+              push_refs+=("refs/upstream-tags/$tag:refs/tags/$tag")
+            fi
+          done < <(git for-each-ref --format='%(objectname) %(refname:strip=2)' refs/upstream-tags/)
+
+          git push --atomic origin "${push_refs[@]}"
+          echo "Synchronized upstream main ($upstream_sha) and missing tags, preserving the destination README.md and existing tags." >> "$GITHUB_STEP_SUMMARY"
